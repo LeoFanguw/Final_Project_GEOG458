@@ -1,0 +1,41 @@
+body {
+  width: 98vw;
+}
+
+.card {
+  margin: .4em;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+#map {
+  height: 98vh;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+}
+
+#chart {
+  height: 58vh;
+  margin-left: -1em;
+}
+
+#description {
+  height: 39vh;
+  margin-left: -1em;
+}
+
+.card-header{
+  font-size: 36px;
+}
+
+#description li{
+  font-size: 22px;
+}
+
+@media only screen and (max-width: 1400px) {
+
+  #chart {
+    margin-left: 0.4em;
+  }
+  
+  #description {
+    margin-left: 0.4em;
+  }
+}
