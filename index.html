@@ -24,20 +24,21 @@
         <ul class="list-group list-group-flush">
           <li class="list-group-item" id="obesityRate">Obesity Rate</li>
           <li class="list-group-item" id="obesityPopulation">Obesity Population</li>
-          <li class="list-group-item" style="font-size: 14px;">Number of Fast Food Restaurants</li>
+          <li class="list-group-item" style="font-size: 12px;">
+            <p>This website demonstrates the obesity population across the United States with three different variables. The choropleth map indicates the obesity rate, the chart shows the population rank and the points presents the distribution of the fast food restaurant located in the United States. You are able to zoom in or zoom out the map to view the specific distribution of fast food restaurants within a state, and you are allowed to click either the map or the chart to get the calculated obesity population and the corresponding rank.</p>
+            <p><strong>Recommendatory Resolution: 1536 * 722</strong></p>
+          </li>
         </ul>
       </div>
     </div>
   </div>
   <script>
-
-    //map
-    var height = 800;
-    var width = 980;
+    var height = document.getElementById('map').offsetHeight-3;
+    var width = document.getElementById('map').offsetWidth-3;
 
     var projection = d3.geoAlbersUsa()
-        .scale(1200)
-        .translate([width/2, height/2.5]);
+        .scale(width+250)
+        .translate([width/2, height/2]);
   
     var path = d3.geoPath().projection(projection);
     var svg1 = d3.select("#map")
@@ -49,17 +50,13 @@
 
       var data = loadData[0]
       var points = loadData[1] 
-      console.log(data)
-      console.log(points)
       var minObesity = d3.min(data.features, function(e) {return e.properties.obesity});
       var maxObesity = d3.max(data.features, function(e) {return e.properties.obesity});
-      console.log(minObesity)
-      console.log(maxObesity)
 
 
       //chart
-      var chartWidth = 480;
-      var chartHeight = 400;
+      var chartWidth = document.getElementById('chart').offsetWidth-10;
+      var chartHeight = document.getElementById('chart').offsetHeight-10;
       var chart = d3.select("#chart").append("svg")
                     .attr('width', chartWidth).attr('height', chartHeight);
       
@@ -72,14 +69,13 @@
       var minPopulation = d3.min(data.features, function(e) {return e.properties.population});
       var maxPopulation = d3.max(data.features, function(e) {return e.properties.population});
       var xScale = d3.scaleLinear().domain([minPopulation, maxPopulation]).range([10, chartWidth]);
-      var yScale = d3.scaleBand().domain(countryPopulationList).rangeRound([0, chartHeight]);
+      var yScale = d3.scaleBand().domain(countryPopulationList).rangeRound([0, chartHeight-10]);
       var colorScale = d3.scaleLinear().domain([minPopulation, 2000000, 5000000, 9000000, maxPopulation]).range(["#eff3ff", "#bdd7e7", "#6baed6", "#3182bd", "#08519c"]);
 
       var getID = function(d) {
             return d.properties.name.replace(/\s+/g, '');
             };
       var clickChart = function(data) {
-                  console.log(getID(data));
                   d3.selectAll("path").style('stroke', 'white').style('stroke-width', 1);
                   d3.select("#" + getID(data)).raise().style('stroke', '#2F4F4F').style('stroke-width', 2);
                   chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.population);});
@@ -96,7 +92,7 @@
             .attr('class', 'bar')
             .attr('id', function(d) { return "b" + (d.properties.name).replace(/\s+/g, ''); })
             .attr('x', xScale(0))
-            .attr('y', function(d, i) { return yScale(d.properties.name) + 0.5 * i -19; })
+            .attr('y', function(d, i) { return yScale(d.properties.name) + 0.5 * i -10; })
             .attr('width', function(d) { return xScale(d.properties.population); })
             .attr('height', yScale.bandwidth())
             .attr('fill', function(d){return colorScale(d.properties.population);})
@@ -104,8 +100,8 @@
 
       chart.append("text")
           .attr("text-anchor", "end")
-          .attr("x", 450 )
-          .attr("y", 250)
+          .attr("x", chartWidth*9/10)
+          .attr("y", chartHeight*7/10)
           .text("Population")
           .style("font-size", 36)
 
@@ -113,14 +109,13 @@
           .attr("text-anchor", "end")
           .attr("class", "rank")
           .attr("id", "population")
-          .attr("x", 450 )
-          .attr("y", 300)
+          .attr("x", chartWidth*9/10)
+          .attr("y", chartHeight*7/10+50)
           .text("")
           .style("font-size", 22)
+  
       //map
-
       var clickMap = function(data) {
-                  console.log(getID(data));
                   d3.selectAll("path").style('stroke', 'white').style('stroke-width', 1);
                   d3.select(this).raise().style('stroke', '#2F4F4F').style('stroke-width', 2);
                   chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.population);});
@@ -168,7 +163,7 @@
       //legend
       svg1.append("g")
           .attr("class", "legend")
-          .attr("transform", "translate(550,630)");
+          .attr("transform", "translate("+ (width * 1/2) +"," + (height * 9/10)+")");
 
       var legendLinear = d3.legendColor()
           .shapeWidth(80)
@@ -181,42 +176,42 @@
       //text
       svg1.append("text")
           .attr("text-anchor", "end")
-          .attr("x", 545 )
-          .attr("y", 643)
+          .attr("x", (width * 1/2 -5))
+          .attr("y", (height * 9/10 + 13) )
           .text("Obesity Rate (%)");
 
       svg1.append("text")
           .attr("text-anchor", "end")
-          .attr("x", 670 )
-          .attr("y", 50)
+          .attr("x", width * 1/2 + 250 )
+          .attr("y", height * 1/10)
           .text("Obesity Rate Across the United States")
-          .style("font-size", 20);
+          .style("font-size", 26);
       
       svg1.append("text")
           .attr("text-anchor", "end")
           .attr("x", 110 )
-          .attr("y", 680)
+          .attr("y", height-20)
           .text("Leo Fang")
           .style("font-size", 20);
 
       svg1.append("g")
           .attr("class", "pointLegend")
-          .attr("transform", "translate(620,682)");
+          .attr("transform", "translate("+ (width * 1/2 -20) +"," + (height * 9/10+50)+")");
 
       svg1.select(".pointLegend")
           .append("circle", ".pin")
-          .attr("r", 2)
+          .attr("r", 3)
           .attr("fill", "#2F4F4F");
 
       svg1.append("text")
           .attr("text-anchor", "end")
-          .attr("x", 870 )
-          .attr("y", 685)
+          .attr("x", width * 1/2 +230 )//250
+          .attr("y", height * 9/10+54)//-3
           .text("is the location of one fast food restaurant")
           .style("font-size", 12);    
 
       //zoom
-      var mapZoom = d3.zoom().scaleExtent([1, 3]).on("zoom", handleZoom);
+      var mapZoom = d3.zoom().scaleExtent([1, 5]).on("zoom", handleZoom);
 
       function handleZoom(e) {
         svg1.selectAll(".boundary").attr("transform", d3.event.transform)
