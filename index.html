@@ -23,9 +23,9 @@
         </div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item" id="obesityRate">Obesity Rate</li>
-          <li class="list-group-item" id="obesityPopulation">Obesity Population</li>
+          <li class="list-group-item" id="totalPopulation">Total Population</li>
           <li class="list-group-item" style="font-size: 12px;">
-            <p>This website demonstrates the obesity population across the United States with three different variables. The choropleth map indicates the obesity rate, the chart shows the population rank and the points presents the distribution of the fast food restaurant located in the United States. You are able to zoom in or zoom out the map to view the specific distribution of fast food restaurants within a state, and you are allowed to click either the map or the chart to get the calculated obesity population and the corresponding rank.</p>
+            <p>This website demonstrates the obesity rate across the United States with three different variables. The choropleth map indicates the obesity rate, the chart shows the obesity population and the points presents the distribution of the fast food restaurant located in the United States. You are able to zoom and pan the map to view the specific distribution of fast food restaurants within a state, and you are allowed to click either the map or the chart to get the calculated obesity population and the corresponding rank.</p>
             <p><strong>Recommendatory Resolution: 1536 * 722</strong></p>
           </li>
         </ul>
@@ -63,14 +63,16 @@
       var populationSorted = data.features.slice().sort(function(a,b){return d3.descending(+a.properties.population, +b.properties.population);})
       var obesitySorted = data.features.slice().sort(function(a,b){return d3.descending(+a.properties.obesity, +b.properties.obesity);})
       var obesityPopulationSorted = data.features.slice().sort(function(a,b){return d3.descending((+a.properties.obesity * 0.01 * a.properties.population), (+b.properties.obesity * 0.01 * b.properties.population));})
-      var countryPopulationList = populationSorted.map(d => d.properties.name);
-      var countryObesityList = obesitySorted.map(d => d.properties.name);
-      var countryObesityPopulationList = obesityPopulationSorted.map(d => d.properties.name);
-      var minPopulation = d3.min(data.features, function(e) {return e.properties.population});
-      var maxPopulation = d3.max(data.features, function(e) {return e.properties.population});
-      var xScale = d3.scaleLinear().domain([minPopulation, maxPopulation]).range([10, chartWidth]);
-      var yScale = d3.scaleBand().domain(countryPopulationList).rangeRound([0, chartHeight-10]);
-      var colorScale = d3.scaleLinear().domain([minPopulation, 2000000, 5000000, 9000000, maxPopulation]).range(["#eff3ff", "#bdd7e7", "#6baed6", "#3182bd", "#08519c"]);
+      obesityPopulationSorted.map((e) => e.properties.obesityPopulation = Math.trunc(e.properties.obesity * 0.01 * e.properties.population))
+      console.log(obesityPopulationSorted)
+      var PopulationList = populationSorted.map(d => d.properties.name);
+      var ObesityList = obesitySorted.map(d => d.properties.name);
+      var obesityPopulationList = obesityPopulationSorted.map(d => d.properties.name);
+      var minObesityPopulation = obesityPopulationSorted[50].properties.obesityPopulation;
+      var maxObesityPopulation = obesityPopulationSorted[1].properties.obesityPopulation;
+      var xScale = d3.scaleLinear().domain([minObesityPopulation, maxObesityPopulation]).range([10, chartWidth]);
+      var yScale = d3.scaleBand().domain(obesityPopulationList).rangeRound([0, chartHeight-10]);
+      var colorScale = d3.scaleLinear().domain([minObesityPopulation, 500000, 1500000, 2000000, maxObesityPopulation]).range(["#eff3ff", "#bdd7e7", "#6baed6", "#3182bd", "#08519c"]);
 
       var getID = function(d) {
             return d.properties.name.replace(/\s+/g, '');
@@ -78,52 +80,52 @@
       var clickChart = function(data) {
                   d3.selectAll("path").style('stroke', 'white').style('stroke-width', 1);
                   d3.select("#" + getID(data)).raise().style('stroke', '#2F4F4F').style('stroke-width', 2);
-                  chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.population);});
+                  chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.obesityPopulation);});
                   d3.select(this).attr("fill", "red");
-                  d3.select("#population").text("Rank(" + (countryPopulationList.indexOf(data.properties.name) +1) + "): " + data.properties.population);
+                  d3.select("#obesityPopulation").text("Rank(" + (obesityPopulationList.indexOf(data.properties.name) +1) + "): " + data.properties.obesityPopulation);
                   document.getElementById('stateName').innerHTML = data.properties.name + " State";
-                  document.getElementById('obesityRate').innerHTML = "Obesity Rate: " + data.properties.obesity + "% (#" + (countryObesityList.indexOf(data.properties.name) +1) + ")";
-                  document.getElementById('obesityPopulation').innerHTML = "Obesity Population: " + Math.trunc(data.properties.obesity * 0.01 * data.properties.population) + " (#" + (countryObesityPopulationList.indexOf(data.properties.name) +1) + ")";
+                  document.getElementById('obesityRate').innerHTML = "Obesity Rate: " + data.properties.obesity + "% (#" + (ObesityList.indexOf(data.properties.name) +1) + ")";
+                  document.getElementById('totalPopulation').innerHTML = "Total Population: " + data.properties.population + " (#" + (PopulationList.indexOf(data.properties.name) +1) + ")";
                 };
 
       chart.selectAll('.bar')
-            .data(populationSorted)
+            .data(obesityPopulationSorted)
             .enter().append('rect')
             .attr('class', 'bar')
-            .attr('id', function(d) { return "b" + (d.properties.name).replace(/\s+/g, ''); })
+            .attr('id', function(d) {return "b" + (d.properties.name).replace(/\s+/g, ''); })
             .attr('x', xScale(0))
             .attr('y', function(d, i) { return yScale(d.properties.name) + 0.5 * i -10; })
-            .attr('width', function(d) { return xScale(d.properties.population); })
+            .attr('width', function(d) { return xScale(d.properties.obesityPopulation); })
             .attr('height', yScale.bandwidth())
-            .attr('fill', function(d){return colorScale(d.properties.population);})
+            .attr('fill', function(d){return colorScale(d.properties.obesityPopulation);})
             .on("click", clickChart);;
 
       chart.append("text")
           .attr("text-anchor", "end")
-          .attr("x", chartWidth*9/10)
+          .attr("x", chartWidth*19/20)
           .attr("y", chartHeight*7/10)
-          .text("Population")
-          .style("font-size", 36)
+          .text("Obesity Population")
+          .style("font-size", 30)
 
       chart.append("text")
           .attr("text-anchor", "end")
           .attr("class", "rank")
-          .attr("id", "population")
-          .attr("x", chartWidth*9/10)
-          .attr("y", chartHeight*7/10+50)
+          .attr("id", "obesityPopulation")
+          .attr("x", chartWidth*19/20)
+          .attr("y", chartHeight*7/10+40)
           .text("")
-          .style("font-size", 22)
+          .style("font-size", 18)
   
       //map
       var clickMap = function(data) {
                   d3.selectAll("path").style('stroke', 'white').style('stroke-width', 1);
                   d3.select(this).raise().style('stroke', '#2F4F4F').style('stroke-width', 2);
-                  chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.population);});
+                  chart.selectAll("rect").attr('fill', function(d){return colorScale(d.properties.obesityPopulation);});
                   d3.select("#b" + getID(data)).attr("fill", "red");
-                  d3.select("#population").text("Rank(" + (countryPopulationList.indexOf(data.properties.name) +1) + "): " + data.properties.population);
+                  d3.select("#obesityPopulation").text("Rank(" + (obesityPopulationList.indexOf(data.properties.name) +1) + "): " + data.properties.obesityPopulation);
                   document.getElementById('stateName').innerHTML = data.properties.name + " State";
-                  document.getElementById('obesityRate').innerHTML = "Obesity Rate: " + data.properties.obesity + "% (#" + (countryObesityList.indexOf(data.properties.name) +1) + ")";
-                  document.getElementById('obesityPopulation').innerHTML = "Obesity Population: " + Math.trunc(data.properties.obesity * 0.01 * data.properties.population) + " (#" + (countryObesityPopulationList.indexOf(data.properties.name) +1) + ")";
+                  document.getElementById('obesityRate').innerHTML = "Obesity Rate: " + data.properties.obesity + "% (#" + (ObesityList.indexOf(data.properties.name) +1) + ")";
+                  document.getElementById('totalPopulation').innerHTML = "Total Population: " + data.properties.population + " (#" + (PopulationList.indexOf(data.properties.name) +1) + ")";
                 };
 
       var color = d3.scaleLinear()
@@ -149,8 +151,9 @@
           .selectAll(".pin")
           .data(points)
           .enter().append("circle", ".pin")
-          .attr("r", .55)
+          .attr("r", 1.2)
           .attr("fill", "#2F4F4F")
+          .attr("opacity", "0.6")
           .attr("transform", function(d) {
             if (projection([d.longitude,d.latitude]) !== null) {
               return "translate(" + projection([
